@@ -43,10 +43,15 @@ func main() {
 			attend.At(4).Find("div > input").Fill("18:00")
 		}
 	}
-	err = page.FindByName("commit").Click()
+	time.Sleep(1 * time.Second)
+	saveButton := page.Find("body > div > div.attendance-contents-inner > div > div > div > div.attendance-main-contents-inner > div > form > div.fixed-header-container > div > div > div.position-right > input[type=\"submit\"]:nth-child(2)")
+	saveButton.MouseToElement()
+	err = saveButton.Click()
 	if err != nil {
 		log.Fatal(err)
 	}
+	// すぐ消すの嫌なので3秒止める
+	time.Sleep(3 * time.Second)
 }
 
 
