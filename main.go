@@ -10,7 +10,16 @@ import (
 	"time"
 )
 
+type MyError struct {
+	message string
+}
+func (e *MyError) Error() string {
+	return e.message
+}
+
 func main() {
+	log.SetPrefix("[INFO]")
+	log.Println("Started")
 	var (
 		companyId string
 		email string
@@ -62,6 +71,8 @@ func main() {
 		log.Fatal(err)
 	}
 	// すぐ消すの嫌なので3秒止める
+	log.SetPrefix("[INFO]")
+	log.Println("End")
 	time.Sleep(3 * time.Second)
 }
 
@@ -100,9 +111,11 @@ func login(page *agouti.Page, id string, email string, password string) {
 	}
 	page.FindByID("employee_session_form_office_account_name").Fill(id)
 	page.FindByID("employee_session_form_account_name_or_email").Fill(email)
-	//page.FindByID("employee_session_form_password").Fill(password)
+	page.FindByID("employee_session_form_password").Fill(password)
 	err := page.FindByName("commit").Click()
+	err = &MyError{"test"}
 	if err != nil {
-		log.Fatal(err)
+		log.SetPrefix("[ERROR]")
+		log.Fatalf("ログイン中にエラー: %v", err)
 	}
 }
