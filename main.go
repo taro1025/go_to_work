@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/sclevine/agouti"
@@ -10,6 +11,16 @@ import (
 )
 
 func main() {
+	var (
+		companyId string
+		email string
+		password string
+	)
+	flag.StringVar(&companyId, "i", "", "マネフォでの会社のID")
+	flag.StringVar(&email, "e", "", "マネフォのログインEmail")
+	flag.StringVar(&password, "p", "", "マネフォのログインパスワード")
+	flag.Parse()
+
 	loadEnv()
 
 	driver := startChromeDriver()
@@ -26,7 +37,7 @@ func main() {
 	}
 
 	if url != bulkAttendancesUrl { // ログインしていない場合はログインする
-		login(page)
+		login(page, companyId, email, password)
 		page.Navigate(bulkAttendancesUrl)
 	}
 
@@ -81,10 +92,15 @@ func thisMonthBulkAttendancesUrl() string{
 	return "https://attendance.moneyforward.com/my_page/bulk_attendances/" + beginningOfMonth.Format(layout) + "/edit"
 }
 
-func login(page *agouti.Page) {
-	page.FindByID("employee_session_form_office_account_name").Fill(os.Getenv("MONEY_COMPANY_ID"))
-	page.FindByID("employee_session_form_account_name_or_email").Fill(os.Getenv("MONEY_EMAIL"))
-	page.FindByID("employee_session_form_password").Fill(os.Getenv("MONEY_PASSWORD"))
+func login(page *agouti.Page, id string, email string, password string) {
+	if id == "" && email == "" && password == "" {
+		id = os.Getenv("MONEY_COMPANY_ID")
+		email = os.Getenv("MONEY_EMAIL")
+		password = os.Getenv("MONEY_PASSWORD")
+	}
+	page.FindByID("employee_session_form_office_account_name").Fill(id)
+	page.FindByID("employee_session_form_account_name_or_email").Fill(email)
+	//page.FindByID("employee_session_form_password").Fill(password)
 	err := page.FindByName("commit").Click()
 	if err != nil {
 		log.Fatal(err)
