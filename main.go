@@ -17,20 +17,24 @@ func (e *MyError) Error() string {
 	return e.message
 }
 
-func main() {
+var (
+	companyId string
+	email string
+	password string
+)
+
+func init() {
 	log.SetPrefix("[INFO]")
 	log.Println("Started")
-	var (
-		companyId string
-		email string
-		password string
-	)
+
 	flag.StringVar(&companyId, "i", "", "マネフォでの会社のID")
 	flag.StringVar(&email, "e", "", "マネフォのログインEmail")
 	flag.StringVar(&password, "p", "", "マネフォのログインパスワード")
 	flag.Parse()
-
 	loadEnv()
+}
+
+func main() {
 
 	driver := startChromeDriver()
 	defer driver.Stop()
@@ -115,6 +119,7 @@ func login(page *agouti.Page, id string, email string, password string) {
 	err := page.FindByName("commit").Click()
 	err = &MyError{"test"}
 	if err != nil {
+		log.SetFlags(log.LstdFlags | log.Lshortfile) //行番号を表示
 		log.SetPrefix("[ERROR]")
 		log.Fatalf("ログイン中にエラー: %v", err)
 	}
